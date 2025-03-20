@@ -19,3 +19,8 @@ export interface IFormComponent extends IBaseComponent {
 	validate(): boolean;
 	clear(): void;
 }
+
+export interface IFormView extends IBaseView {
+	showValidation(errors: Record<string, string>): void;
+	clear(): void;
+}

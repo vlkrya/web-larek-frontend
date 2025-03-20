@@ -52,3 +52,8 @@ export enum Events {
 	CLOSE_MODAL = 'modal:close',
 	UPDATE_CATALOG = 'catalog:update',
 }
+
+export interface IOrderModel extends IModel {
+	validate(): Record<string, string>;
+	isValid(): boolean;
+}
