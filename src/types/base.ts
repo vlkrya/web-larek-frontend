@@ -4,23 +4,19 @@ export interface IEventEmitter {
 	emit<T extends object>(event: string, data: T): void;
 }
 
-export interface IBaseComponent {
+export interface IBaseView {
 	readonly container: HTMLElement;
+	render(): HTMLElement;
 	show(): void;
 	hide(): void;
-	toggle(): void;
 }
 
-export interface IModalComponent extends IBaseComponent {
+export interface IModalView extends IBaseView {
 	close(): void;
+	open(): void;
 }
 
-export interface IFormComponent extends IBaseComponent {
-	validate(): boolean;
-	clear(): void;
-}
-
-export interface IFormView extends IBaseView {
+export interface IBaseFormView extends IBaseView {
 	showValidation(errors: Record<string, string>): void;
 	clear(): void;
 }
