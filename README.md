@@ -52,28 +52,73 @@ Event-обработчик в index.ts реагируют на эти событ
 
 ---
 
-Компоненты и классы
+Компоненты и описание классов
 
-Model:
-AppState - управляет каталогом, заказом, предпросмотром, форм-валидацией
-Model - базовый класс моделей
-ProductAPI - загрузка данных с сервера и оформление заказа
+AppState
+Назначение: модель состояния приложения, хранит каталог товаров, текущий заказ и предпросмотр товара
+Конструктор constructor (api: IProductAPI, events: EventEmitter)
+api: IProductAPI - интерфейс для обращения к серверу
+events: EventEmitter - брокер событий
 
-View:
+Поля:
+catalog: IProduct[] - список товаров
+preview: IProduct | null - товар, выбранный для предпросмотра
+order: IOrder | null - текущий заказ
 
-Page - главная страница, отображает каталог и счетчик корзины
-Modal - универсальное модальное окно
-CatalogItem/ ProductCard/ BasketItem - карточки товара в катологе, предпросмотре и корзине
-Basket - модальное окно корзины
-Order = форма адреса и способа оплаты
-Contacts - форма контактной информации
-Success - окно успешного закзаа
+Методы
+setCatalog(items: IProduct[]) - сохраняет каталог товаров
+getProduct(productId: string) - возвращает товар по ID
+addToOrder(product: IProduct) - добавляет товар в заказ
+removeFromOrder(product: IProduct) - устанавливает товар для предпросмотра
+cleatOrder() - очищает заказ
+setPreview(product: IProduct) - устанавливает товар для предпросмотра
+setOrderField(field: keyof IContactInform | 'address', value: string) - изменяет поле заказа
+setPaymentMethod(value: PaymentMethod) - задает способ оплаты
+validateOrder() - валидирует заказ
 
-Базовые
+ProductAPi
+Назначение: предоставляет методы для загрузки каталога и оформления заказа
 
-Component - базовый класс всех View-компонентов
-Form - базовый класс для форм Order и Contacts
-EventEmitter - брокер событий
+Методы
+getProducts(): Promise<IProduct[]> - получает список товаров
+order(data: IOrder): Promise<void> - отправляет заказ на сервер
+
+Component
+Назначение: базовый класс компонентов UI
+Конструктор: constructor(protected element: HTMLElement)
+Поля: element: HTMLElement - корневой элемент компонента
+Методы: render(dataa: unknown): HTMLElement - отрисовывает компонент
+
+Modal
+Назначение: универсальное модальное окно, отображающее произвольный контент
+Наследует: Compoent
+Поля:
+closeButton: HTMLButtonElement
+content: HTMLElement
+Методы:
+setContent(content: HTMLElement) - задает контент
+open() / close () - отображение / скрытие окна
+
+Basket
+Назначение: отображает корзину с товарами
+Наследует: Component
+Поля: items: BasketItem[] - компоненты с товарами
+total: number - сумма заказа
+
+Методы
+render(data: IProduct[]) - отрисовывает содержимое корзины
+
+Form, Order, Contacts
+
+Назначение: компоненты форм заказа и контактов
+Наследуют: Form
+Поля:
+fields: Record<string, HTMLInputElement> - инпуты формы
+errors: Record<string, string> - ошиибки валидации
+
+Методы
+setField(name: string, value: string) - обновляет значение поля
+validate() - проверка полей формы
 
 ## Типы данных и интерфейсы
 
