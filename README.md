@@ -50,138 +50,43 @@ Presenter - связывает Model и View через события (в index
 Event-обработчик в index.ts реагируют на эти события и вызывают методы модели
 Модель генерирует события об изменениях, которые обновляют View
 
----
+## Классы приложения
 
-Компоненты и описание классов
+- **EventEmitter** — брокер событий. Методы `on`, `off`, `emit`. Внутри хранится `Map<string, Set<Function>>`.
+- **Api** — базовый HTTP-клиент (`constructor(baseUrl: string, options?)`, методы `get<T>` и `post<T>`).
+- **ProductAPI** — наследник `Api`, работает с сервером Ларька: `getProductList`, `getProductItem`, `orderProducts`.
+- **Model<T>** — абстрактная модель (`constructor(data, events)` и защищённый `emitChanges`).
+- **AppState** — модель состояния приложения. Методы: `setCatalog`, `addToOrder`, `removeFromOrder`, `clearOrder`, `setPreview`, `setOrderField`, `setPaymentMethod`, `validateOrder`.
+- **Component<T>** — базовый класс представления (`render`, `setText`, `setImage`, `toggleClass`).
+- **Page** — верхний контейнер приложения; сеттеры `catalog`, `counter`, `locked`.
+- **CardView** — абстрактная карточка товара; сеттеры `id`, `title`, `price`.
+- **CatalogItem** — карточка в списке каталога; добавляет поля `_image`, `_category`.
+- **ProductCard** — детальная карточка товара; добавляет `_description` и кнопку `buttonAddToCart`.
+- **BasketItem** — карточка товара в корзине; дополнительный сеттер `index`.
+- **Basket** — компонент корзины; сеттеры `items` и `total`.
+- **Modal** — универсальное модальное окно (`open`, `close`, сеттер `content`).
+- **Form<T>** — базовый компонент формы (`onInputChange`, сеттеры `valid`, `errors`).
+- **Order** — форма доставки и способа оплаты; сеттеры `payment`, `address`, метод `disableButtons`.
+- **Contacts** — форма контактных данных; сеттеры `phone`, `email`.
+- **Success** — окно «Заказ оформлен»; сеттер `total`.
 
-AppState
-Назначение: модель состояния приложения, хранит каталог товаров, текущий заказ и предпросмотр товара
+## Типы данных
 
-Конструктор constructor (api: IProductAPI, events: EventEmitter)
-
-api: IProductAPI - интерфейс для обращения к серверу
-
-events: EventEmitter - брокер событий
-
-Поля:
-catalog: IProduct[] - список товаров
-
-preview: IProduct | null - товар, выбранный для предпросмотра
-
-order: IOrder | null - текущий заказ
-
-Методы
-
-setCatalog(items: IProduct[]) - сохраняет каталог товаров
-
-getProduct(productId: string) - возвращает товар по ID
-
-addToOrder(product: IProduct) - добавляет товар в заказ
-
-removeFromOrder(product: IProduct) - устанавливает товар для предпросмотра
-
-cleatOrder() - очищает заказ
-
-setPreview(product: IProduct) - устанавливает товар для предпросмотра
-
-setOrderField(field: keyof IContactInform | 'address', value: string) - изменяет поле заказа
-
-setPaymentMethod(value: PaymentMethod) - задает способ оплаты
-
-validateOrder() - валидирует заказ
-
-ProductAPi
-Назначение: предоставляет методы для загрузки каталога и оформления заказа
-
-Методы
-getProducts(): Promise<IProduct[]> - получает список товаров
-
-order(data: IOrder): Promise<void> - отправляет заказ на сервер
-
-Component
-Назначение: базовый класс компонентов UI
-
-Конструктор: constructor(protected element: HTMLElement)
-
-Поля: element: HTMLElement - корневой элемент компонента
-
-Методы: render(dataa: unknown): HTMLElement - отрисовывает компонент
-
-Modal
-
-Назначение: универсальное модальное окно, отображающее произвольный контент
-
-Наследует: Compoent
-
-Поля:
-
-closeButton: HTMLButtonElement
-
-content: HTMLElement
-
-Методы:
-
-setContent(content: HTMLElement) - задает контент
-
-open() / close () - отображение / скрытие окна
-
-Basket
-
-Назначение: отображает корзину с товарами
-
-Наследует: Component
-
-Поля: items: BasketItem[] - компоненты с товарами
-
-total: number - сумма заказа
-
-Методы
-render(data: IProduct[]) - отрисовывает содержимое корзины
-
-Form, Order, Contacts
-
-Назначение: компоненты форм заказа и контактов
-
-Наследуют: Form
-
-Поля:
-fields: Record<string, HTMLInputElement> - инпуты формы
-
-errors: Record<string, string> - ошиибки валидации
-
-Методы
-setField(name: string, value: string) - обновляет значение поля
-
-validate() - проверка полей формы
-
-## Типы данных и интерфейсы
-
-IProduct - товар: id, title, description, price, image, category
-
-IOrderForm - способ оплаты и адрес доставки
-
-IContactInForm - email и phone
-
-IOrder - объединяет IOrderForm и IContactInfoForm + items: IProduct[]
-
-PaymentMethod - card, cash
-
-FormErrors - объект ошибок валидации формы
+- **IProduct** — `id`, `title`, `description`, `category`, `price`, `image`.
+- **PaymentMethod** — перечисление: `'card'` или `'cash'`.
+- **IOrderForm** — `address`, `payment`.
+- **IContactInfoForm** — `email`, `phone`.
+- **IOrder** — объединяет `IOrderForm`, `IContactInfoForm` и массив `items: IProduct[]`.
+- **FormErrors** — объект вида `{ [ключ поля]: сообщение об ошибке }`.
 
 ## События
 
-'items: changed' - обновление каталога
-
-'basket: changed' - изменения в корзине
-
-'priview: changed' - открытие предпросмотра товара
-
-'basket: open' - клик на иконку корзины
-
-'order:open' - переход к оформлению заказа
-
-'order: submit' - отправка формы заказа
-
-'order.payment:change', 'order.address:change' - изменения в Order
-
-'contacts.email: change','contacts.phone: change' - изменения в Contacts
+- `items:changed` — генерирует `AppState.setCatalog`; слушает `Page`, чтобы перерисовать каталог.
+- `basket:changed` — вызывается при добавлении или удалении товаров; обновляет счётчик (`Page`) и содержимое (`Basket`).
+- `preview:changed` — генерирует `AppState.setPreview`; `Modal` показывает `ProductCard`.
+  `basket:open` — генерирует `Page` при клике на иконку корзины; `Modal` открывает компонент `Basket`.
+- `order:open` — создаёт `Basket`; `Modal` открывает форму `Order`.
+- `order:submit` — отправляет форма `Order`; `AppState` валидирует заказ.
+- `contacts:submit` — отправляет форма `Contacts`; `ProductAPI` делает POST `/order`.
+- `formErrors:change` — генерирует `AppState.validateOrder`; формы выводят сообщения об ошибках.
+- `modal:open` и `modal:close` — управляют блокировкой фона в `Page`.
